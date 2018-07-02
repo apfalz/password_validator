@@ -29,7 +29,7 @@ public class Password_Validator{
             if (raw_passwd != ""){
                 done = true;
             }else{
-                //this is an assumption that I made that wasn't clear from the assignment
+                //this is an assumption that I made that wasn't clear from the assignmentx
                 System.out.println("password cannot be blank!");
                 message = "Please enter another password >>";
             }
