@@ -3,11 +3,13 @@ import java.util.Scanner;
 import java.security.MessageDigest;
 import java.nio.charset.StandardCharsets;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.DataOutputStream;
+import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-
+import java.io.IOException;
 
 public class Password_Validator{
 
@@ -155,6 +157,18 @@ public class Password_Validator{
     }
 
 
+    public static void write_to_disk(String password) {
+        System.out.println("attempting to cache password");
+        try{
+            String  output_fn   = "successful_passwords.txt";
+            BufferedWriter writer = new BufferedWriter(new FileWriter(output_fn, true));
+            writer.write(password + "\n");
+            writer.close();
+            System.out.println("wrote successful password to disk");
+        }catch(Exception e){
+            System.out.println("failed to save the file");
+        }
+    }
 
 
 
@@ -165,17 +179,22 @@ public class Password_Validator{
 
 
     public static void main(String[] args){
+        Boolean success = false;
+        Boolean result  = false;
         String raw_passwd = get_input();
 
-        Boolean success   = check_simple_reqs(raw_passwd);
+        success           = check_simple_reqs(raw_passwd);
 
         if(success){
+            System.out.println("passed simple requirements");
 
             String hash       = string_to_hex(raw_passwd);
 
-            Boolean result    = check_for_breech(hash);
-
-            System.out.println(result);
+            result            = check_for_breech(hash);
+        }
+        if(!result){
+            System.out.println("did not find password on haveibeenpwned.");
+            write_to_disk(raw_passwd);
         }
 
     }
