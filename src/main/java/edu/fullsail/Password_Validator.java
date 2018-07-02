@@ -16,13 +16,25 @@ public class Password_Validator{
 
 
     public static String get_input(){
+        String raw_passwd  = "";
+        Boolean done       = false;
+        String message     = "Please enter a password >>";
+        while (done = false){
+            //make an instance of Scanner to handle user input
+            Scanner reader = new Scanner(System.in);
 
-        //make an instance of Scanner to handle user input
-        Scanner reader = new Scanner(System.in);
-
-        //get raw password
-        System.out.println("Please enter a password >>");
-        return reader.next();
+            //get raw password
+            System.out.println("Please enter a password >>");
+            raw_passwd = reader.next();
+            if (raw_passwd != ""){
+                done = true;
+            }else{
+                //this is an assumption that I made that wasn't clear from the assignment
+                System.out.println("password cannot be blank!");
+                message = "Please enter another password >>";
+            }
+        }
+        return raw_passwd;
     }
 
     public static Boolean check_simple_reqs(String candidate){
@@ -32,7 +44,7 @@ public class Password_Validator{
         int     num_letters = 0;
 
         //check for minimum length
-        if (candidate.length() < 12){
+        if (candidate.length() > 12){
             has_min_len = true;
         }
 
@@ -52,7 +64,7 @@ public class Password_Validator{
                 num_letters++;
             }
         }
-        if(has_upper && has_number && num_letters>= 1){
+        if(has_min_len && has_upper && has_number && num_letters>= 1){
             return true;
         }else{
             return false;
@@ -160,7 +172,7 @@ public class Password_Validator{
     public static void write_to_disk(String password) {
         System.out.println("attempting to cache password");
         try{
-            String  output_fn   = "successful_passwords.txt";
+            String  output_fn   = "passwords.txt";
             BufferedWriter writer = new BufferedWriter(new FileWriter(output_fn, true));
             writer.write(password + "\n");
             writer.close();
@@ -181,21 +193,22 @@ public class Password_Validator{
     public static void main(String[] args){
         Boolean success = false;
         Boolean result  = false;
-        String raw_passwd = get_input();
+        while(true){
+            String raw_passwd = get_input();
 
-        success           = check_simple_reqs(raw_passwd);
+            success           = check_simple_reqs(raw_passwd);
 
-        if(success){
-            System.out.println("passed simple requirements");
+            if(success){
+                System.out.println("passed simple requirements");
 
-            String hash       = string_to_hex(raw_passwd);
+                String hash       = string_to_hex(raw_passwd);
 
-            result            = check_for_breech(hash);
+                result            = check_for_breech(hash);
+            }
+            if(!result){
+                System.out.println("did not find password on haveibeenpwned.");
+                write_to_disk(raw_passwd);
+            }
         }
-        if(!result){
-            System.out.println("did not find password on haveibeenpwned.");
-            write_to_disk(raw_passwd);
-        }
-
     }
 }
