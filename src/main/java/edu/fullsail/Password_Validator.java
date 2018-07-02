@@ -88,6 +88,8 @@ public class Password_Validator{
         String   hash_prefix = "";
         String   hash_suffix = "";
         String[] suffixes;
+        Boolean  is_match    = false;
+
 
         //partition full_hash into first five characters and rest of hash
         for (int i=0; i<full_hash.length(); i++){
@@ -97,8 +99,6 @@ public class Password_Validator{
                 hash_suffix += full_hash.charAt(i);
             }
         }
-
-
 
         //make a request to the api
         try{
@@ -125,31 +125,41 @@ public class Password_Validator{
                 // System.out.println(full_response);
                 suffixes = full_response.split("\n");
 
+                //assuming the hashes come back sorted.
+                Boolean done     = false;
+                int     cursor   = 0;
+                int     len      = hash_suffix.length();
+                int     num_suf  = suffixes.length;
+                String  cur_hash;
 
-                for(String temp: suffixes){
-                    if ( temp.charAt(0) == hash_suffix.charAt(0)){
-                        int mismatches = 0;
-                        for(int i=0;i<temp.length();i++){
-                            if (temp.charAt(i) != hash_suffix.charAt(i)){
-                                mismatches++;
-                            }
+                while(done == false && cursor < num_suf){
+                    cur_hash = suffixes[cursor];
+                    for(int i=0;i<len;i++){
+                        if (cur_hash.charAt(i) != hash_suffix.charAt(i)){
+                            cursor++;
+                            break;
+                        }else if(i == len - 1){
+                            System.out.println("found match");
+                            System.out.println(cur_hash + " " + hash_suffix);
+                            done     = true;
+                            is_match = true;
                         }
-                        System.out.println(mismatches);
-                        if (mismatches == 0){
-                            System.out.println("Found a match!");
-                            System.out.println(temp + " " + hash_suffix);
-                        }
-                    }//else{
-                        //System.out.println(temp + " " + hash_suffix);
-                    //}
+                    }
                 }
             }
         }catch(Exception e){
             System.out.println("malformed url");
         }
-        return true;
+        return is_match;
 
     }
+
+
+
+
+
+
+
 
 
 
@@ -159,9 +169,14 @@ public class Password_Validator{
 
         Boolean success   = check_simple_reqs(raw_passwd);
 
-        String hash       = string_to_hex(raw_passwd);
+        if(success){
 
-        Boolean result    = check_for_breech(hash);
+            String hash       = string_to_hex(raw_passwd);
+
+            Boolean result    = check_for_breech(hash);
+
+            System.out.println(result);
+        }
 
     }
 }
