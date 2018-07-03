@@ -16,24 +16,28 @@ public class Password_Validator{
 
 
     public static String get_input(){
-        Boolean done       = false;
-        String raw_passwd  = "";
-        String message     = "\n\n\n\n\n\n" + "Please enter a password. \n or enter \"q\" to quit.\n>> ";
+        Boolean      done = false;
+        String raw_passwd = "";
+        String    message = "\n\n\n\n\n\n" + "Please enter a password. \n or enter \"q\" to quit.\n>> ";
 
         //make an instance of Scanner to handle user input
-        Scanner reader = new Scanner(System.in);
+        Scanner    reader = new Scanner(System.in);
 
 
         while(!done){
-            //update message after printing to make it more responsive.
             System.out.print(message);
+
+            //update message after printing to make it more responsive.
             message    = "\n\n Previous entry was invalid.\nPlease enter another password >> ";
 
             //get raw password
             raw_passwd = reader.nextLine();
+
+            //I assumed that an empty string is an invalid password.
             if (raw_passwd.isEmpty()){
                 System.out.print("Password cannot be blank.");
             }else{
+                //if user inputs a non-empty string, return it to main()
                 done = true;
             }
         }
@@ -67,7 +71,28 @@ public class Password_Validator{
                 num_letters++;
             }
         }
-        if(has_min_len && has_upper && has_number && num_letters>= 1){
+        if (!has_min_len){
+            System.out.println("Password must have at least 12 characters.");
+            return false;
+        }
+
+        if (!has_upper){
+            System.out.println("Password must contain at least 1 upper case letter.");
+            return false;
+        }
+
+        if (!has_number){
+            System.out.println("Password must contain at least 1 number.");
+            return false;
+        }
+
+        if (num_letters == 0){
+            System.out.println("Password must contain at least 1 letter.");
+            return false;
+        }
+
+
+        else if(has_min_len && has_upper && has_number && num_letters>= 1){
             return true;
         }else{
             return false;
