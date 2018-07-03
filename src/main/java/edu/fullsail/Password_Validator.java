@@ -17,23 +17,14 @@ public class Password_Validator{
 
     public static String get_input(){
         String raw_passwd  = "";
-        Boolean done       = false;
         String message     = "Please enter a password >>";
-        while (done = false){
-            //make an instance of Scanner to handle user input
-            Scanner reader = new Scanner(System.in);
+        //make an instance of Scanner to handle user input
+        Scanner reader = new Scanner(System.in);
 
-            //get raw password
-            System.out.println("Please enter a password >>");
-            raw_passwd = reader.next();
-            if (raw_passwd != ""){
-                done = true;
-            }else{
-                //this is an assumption that I made that wasn't clear from the assignmentx
-                System.out.println("password cannot be blank!");
-                message = "Please enter another password >>";
-            }
-        }
+        //get raw password
+        System.out.println("Please enter a password >>");
+        raw_passwd = reader.next();
+
         return raw_passwd;
     }
 
@@ -192,7 +183,7 @@ public class Password_Validator{
 
     public static void main(String[] args){
         Boolean success = false;
-        Boolean result  = false;
+        Boolean comprimised  = true;
 
         String raw_passwd = get_input();
 
@@ -203,9 +194,9 @@ public class Password_Validator{
 
             String hash       = string_to_hex(raw_passwd);
 
-            result            = check_for_breech(hash);
+            comprimised     = check_for_breech(hash);
         }
-        if(!result){
+        if(!comprimised){
             System.out.println("did not find password on haveibeenpwned.");
             write_to_disk(raw_passwd);
         }
