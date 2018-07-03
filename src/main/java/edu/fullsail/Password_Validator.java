@@ -245,6 +245,7 @@ public class Password_Validator{
             }
             if(comprimised != null && !comprimised){
                 System.out.println("\n\n\nPassword accepted as valid!");
+                System.out.println("Wrote password to passwords.txt.");
                 write_to_disk(raw_passwd);
             }
         }
