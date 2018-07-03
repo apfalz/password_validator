@@ -16,15 +16,27 @@ public class Password_Validator{
 
 
     public static String get_input(){
+        Boolean done       = false;
         String raw_passwd  = "";
-        String message     = "Please enter a password >>";
+        String message     = "\n\n\n\n\n\n" + "Please enter a password. \n or enter \"q\" to quit.\n>> ";
+
         //make an instance of Scanner to handle user input
         Scanner reader = new Scanner(System.in);
 
-        //get raw password
-        System.out.println("Please enter a password >>");
-        raw_passwd = reader.next();
 
+        while(!done){
+            //update message after printing to make it more responsive.
+            System.out.print(message);
+            message    = "\n\n Previous entry was invalid.\nPlease enter another password >> ";
+
+            //get raw password
+            raw_passwd = reader.next();
+            if (raw_passwd.isEmpty()){
+                System.out.print("Password cannot be blank.");
+            }else{
+                done = true;
+            }
+        }
         return raw_passwd;
     }
 
@@ -84,10 +96,6 @@ public class Password_Validator{
         }
     }
 
-
-
-
-
     public static Boolean check_for_breech(String full_hash) {
 
         String   hash_prefix = "";
@@ -113,17 +121,18 @@ public class Password_Validator{
 
             //check response code
             int status = con.getResponseCode();
-            if (status == 200){
-                System.out.println("successfully made a connection to api");
 
+            if (status == 200){
                 //read the response
                 BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
                 String         input_line;
                 String         full_response = "";
+
                 while ((input_line = in.readLine()) != null) {
                     String temp   = input_line.split(":")[0];
                     full_response = full_response + temp.toLowerCase() + "\n";
                 }
+
                 in.close();
                 con.disconnect();
 
@@ -131,10 +140,10 @@ public class Password_Validator{
                 suffixes = full_response.split("\n");
 
                 //assuming the hashes come back sorted.
-                Boolean done     = false;
-                int     cursor   = 0;
-                int     len      = hash_suffix.length();
-                int     num_suf  = suffixes.length;
+                Boolean     done = false;
+                int       cursor = 0;
+                int          len = hash_suffix.length();
+                int      num_suf = suffixes.length;
                 String  cur_hash;
 
                 while(done == false && cursor < num_suf){
@@ -161,13 +170,11 @@ public class Password_Validator{
 
 
     public static void write_to_disk(String password) {
-        System.out.println("attempting to cache password");
         try{
-            String  output_fn   = "passwords.txt";
+            String      output_fn = "passwords.txt";
             BufferedWriter writer = new BufferedWriter(new FileWriter(output_fn, true));
             writer.write(password + "\n");
             writer.close();
-            System.out.println("wrote successful password to disk");
         }catch(Exception e){
             System.out.println("failed to save the file");
         }
@@ -182,23 +189,39 @@ public class Password_Validator{
 
 
     public static void main(String[] args){
-        Boolean success = false;
-        Boolean comprimised  = true;
+        Boolean        done = false;
 
-        String raw_passwd = get_input();
+        while (!done){
+            //reset state
+            Boolean     success = false;
+            Boolean comprimised = null;
 
-        success           = check_simple_reqs(raw_passwd);
+            //first get the raw password from the user. reject it only if the input string is empty.
+            String   raw_passwd = get_input();
 
-        if(success){
-            System.out.println("passed simple requirements");
+            //allow for quitting gracefully.
+            if (raw_passwd.equals("q")){
+                System.out.println("\n\n\nQuitting now...");
+                System.exit(0);
 
-            String hash       = string_to_hex(raw_passwd);
+            }
 
-            comprimised     = check_for_breech(hash);
-        }
-        if(!comprimised){
-            System.out.println("did not find password on haveibeenpwned.");
-            write_to_disk(raw_passwd);
+            //then check if it passes the simple requirements
+            success             = check_simple_reqs(raw_passwd);
+
+            if(success){
+                //get hex string of sha-1 hash of raw password.
+                String     hash = string_to_hex(raw_passwd);
+
+                //check if password exists in haveibeenpwned
+                comprimised     = check_for_breech(hash);
+            }else{
+                System.out.println("Password fails to meet criteria");
+            }
+            if(comprimised != null && !comprimised){
+                System.out.println("\n\n\nPassword accepted as valid!");
+                write_to_disk(raw_passwd);
+            }
         }
 
     }
