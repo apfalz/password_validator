@@ -30,7 +30,7 @@ public class Password_Validator{
             message    = "\n\n Previous entry was invalid.\nPlease enter another password >> ";
 
             //get raw password
-            raw_passwd = reader.next();
+            raw_passwd = reader.nextLine();
             if (raw_passwd.isEmpty()){
                 System.out.print("Password cannot be blank.");
             }else{
