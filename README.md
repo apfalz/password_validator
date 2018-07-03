@@ -1,9 +1,9 @@
 # password_validator
-To build project run:
+To build project from project root directory run:
 
-mvn package
+`mvn package`
 
 
-To execute built package from target/classes/ run:
+To execute built package from `target/classes/` run:
 
-java password_validator.Password_Validator
+`java password_validator.Password_Validator`
