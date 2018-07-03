@@ -1,5 +1,5 @@
 # password_validator
-To build project run:
+To build project from project root directory run:
 
 `mvn package`
 
