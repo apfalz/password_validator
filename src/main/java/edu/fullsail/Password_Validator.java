@@ -193,22 +193,22 @@ public class Password_Validator{
     public static void main(String[] args){
         Boolean success = false;
         Boolean result  = false;
-        while(true){
-            String raw_passwd = get_input();
 
-            success           = check_simple_reqs(raw_passwd);
+        String raw_passwd = get_input();
 
-            if(success){
-                System.out.println("passed simple requirements");
+        success           = check_simple_reqs(raw_passwd);
 
-                String hash       = string_to_hex(raw_passwd);
+        if(success){
+            System.out.println("passed simple requirements");
 
-                result            = check_for_breech(hash);
-            }
-            if(!result){
-                System.out.println("did not find password on haveibeenpwned.");
-                write_to_disk(raw_passwd);
-            }
+            String hash       = string_to_hex(raw_passwd);
+
+            result            = check_for_breech(hash);
         }
+        if(!result){
+            System.out.println("did not find password on haveibeenpwned.");
+            write_to_disk(raw_passwd);
+        }
+
     }
 }
