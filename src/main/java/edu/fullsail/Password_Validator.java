@@ -30,13 +30,13 @@ public class Password_Validator{
     public static Scanner reader = new Scanner(System.in);
 
     //Method for checking if string is ascii printable.
-    public static boolean isAsciiPrintable(String str) {
+    public static boolean is_ascii_printable(String str) {
         if (str == null) {
             return false;
         }
         int sz = str.length();
         for (int i = 0; i < sz; i++) {
-            if (isAsciiPrintable(str.charAt(i)) == false) {
+            if (is_ascii_printable(str.charAt(i)) == false) {
                 return false;
             }
         }
@@ -44,7 +44,7 @@ public class Password_Validator{
     }
 
     //Checks if char is asciiprintable
-    public static boolean isAsciiPrintable(char ch) {
+    public static boolean is_ascii_printable(char ch) {
         //Allow only space through tilde to get through.
         return ch >= 32 && ch < 127;
     }
@@ -65,7 +65,7 @@ public class Password_Validator{
             raw_passwd = reader.nextLine();
 
             //Reject if anything outside of printable ascii is found.
-            if (!isAsciiPrintable(raw_passwd)){
+            if (!is_ascii_printable(raw_passwd)){
                 System.out.println("Encountered invalid non-printable ascii character. Rejecting password.");
             }
 
