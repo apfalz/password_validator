@@ -30,6 +30,25 @@ public class Password_Validator{
     //it will get closed inside of main() when program exits.
     public static Scanner reader = new Scanner(System.in);
 
+    //method for checking if string is ascii printable
+    public static boolean isAsciiPrintable(String str) {
+        if (str == null) {
+            return false;
+        }
+        int sz = str.length();
+        for (int i = 0; i < sz; i++) {
+            if (isAsciiPrintable(str.charAt(i)) == false) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    //helper function that checks if char is asciiprintable
+    public static boolean isAsciiPrintable(char ch) {
+        return ch >= 32 && ch < 127;
+    }
+
     public static String  get_input(){
         String raw_passwd = "";
         String    message = "\n\n\n\n\n\n" + "Please enter a password. \n or enter \"q\" to quit.\n>> ";
@@ -39,28 +58,13 @@ public class Password_Validator{
             System.out.print(message);
 
             //update message after printing to make it more responsive.
-            message    = "\n\n Previous entry was invalid.\nPlease enter another password >> ";
+            message    = "\n\n Previous entry was invalid. Please enter another password >> ";
 
             //get raw password
             raw_passwd = reader.nextLine();
-            System.out.println("before");
-            System.out.println(raw_passwd);
 
-            raw_passwd = raw_passwd.replaceAll("[^\\x20-\\x7E]", "");
-
-
-            System.out.println(raw_passwd);
-            System.out.println(raw_passwd.length());
-
-            //check for arrow keys that were not supressed from shell
-            if (raw_passwd.contains("^[[")){
-
-
-                System.out.println("Found unsupressed arrow keys. Rejecting password.");
-            }
-            //I am assuming we want to reject non-ascii characters because they could lead to unforseen consequences.
-            if (!raw_passwd.matches("\\A\\p{ASCII}*\\z")){
-                System.out.println("Found some non-ascii characters. Rejecting password.");
+            if (!isAsciiPrintable(raw_passwd)){
+                System.out.println("Encountered invalid non-printable ascii character. rejecting password.");
             }
 
             //I assumed that an empty string is an invalid password.
