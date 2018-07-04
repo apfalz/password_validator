@@ -19,7 +19,7 @@ import java.io.IOException;
 *         `mvn package`
 *
 *     To execute built package from `target/classes/` run:
-*         `java password_validator.Password_Validator`
+*         `java -jar Password_Validator-1.0.jar`
 */
 
 
