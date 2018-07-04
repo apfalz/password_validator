@@ -46,32 +46,35 @@ public class Password_Validator{
 
     //helper function that checks if char is asciiprintable
     public static boolean isAsciiPrintable(char ch) {
+        //allow only space through tilde to get through.;
         return ch >= 32 && ch < 127;
     }
 
     public static String  get_input(){
+        //get input from user, reject non-printing ascii characters and empty strings.
         String raw_passwd = "";
-        String    message = "\n\n\n\n\n\n" + "Please enter a password. \n or enter \"q\" to quit.\n>> ";
+        String    message = "\n\n\n\n\n\n" + "Please enter a password. \nor enter \"q\" to quit.\n>> ";
 
 
         while(true){
             System.out.print(message);
 
             //update message after printing to make it more responsive.
-            message    = "\n\n Previous entry was invalid. Please enter another password >> ";
+            message    = "\n\nPrevious entry was invalid. Please enter another password >> ";
 
             //get raw password
             raw_passwd = reader.nextLine();
 
+            //reject if anything outside of printable ascii is found.
             if (!isAsciiPrintable(raw_passwd)){
-                System.out.println("Encountered invalid non-printable ascii character. rejecting password.");
+                System.out.println("Encountered invalid non-printable ascii character. Rejecting password.");
             }
 
             //I assumed that an empty string is an invalid password.
             else if (raw_passwd.isEmpty()){
                 System.out.print("Password cannot be blank.");
             }else{
-                //if user inputs a non-empty string, return it to main()
+                //if entered passwords passed both tests, return it to main() to be further tested.
                 break;
             }
         }
@@ -79,6 +82,7 @@ public class Password_Validator{
     }
 
     public static Boolean check_simple_reqs(String candidate){
+        //check for length, letters, uppercase, and digits.
         Boolean has_min_len = false;
         Boolean   has_upper = false;
         Boolean  has_number = false;
@@ -131,6 +135,7 @@ public class Password_Validator{
     }
 
     public static String string_to_hex(String candidate){
+        //convert hash of password to hex string so it can be compared to response from api.
         try{
             MessageDigest digest    = MessageDigest.getInstance("SHA-1");
 
@@ -154,6 +159,7 @@ public class Password_Validator{
     }
 
     public static Boolean check_for_breach(String full_hash) {
+        //check haveibeenpwned.com to see if entered password appears in list of leaked password.
 
         String   hash_prefix = "";
         String   hash_suffix = "";
@@ -171,7 +177,6 @@ public class Password_Validator{
         }
 
         try{
-
             //make a request to the api
             URL               url = new URL("https://api.pwnedpasswords.com/range/" + hash_prefix);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -200,38 +205,41 @@ public class Password_Validator{
                 //fill suffixes with hash suffixes
                 suffixes = full_response.split("\n");
 
-                //assuming the hashes come back sorted.
+                //I observed that the hashes come back sorted.
                 Boolean     done = false;
                 int       cursor = 0;
                 int          len = hash_suffix.length();
                 int      num_suf = suffixes.length;
                 String  cur_hash;
-                int suffix_first = Integer.decode(hash_suffix.substring(0,1));
+
+                //git the int value of the first character in hash_suffix.
+                int suffix_first = Integer.decode("0x" + hash_suffix.substring(0,1));
 
                 //search for matches in http response
                 while(done == false && cursor < num_suf){
                     cur_hash = suffixes[cursor];
 
                     //get int value of first character in each cur_hash
-                    int cur_first  = Integer.decode(cur_hash.substring(0,1));
+                    int cur_first  = Integer.decode("0x" + cur_hash.substring(0,1));
 
 
                     if (cur_first > suffix_first){
-                        //we know there are no results in remaining suffixes, because they are sorted.
+                        //we know there are no matches in remaining suffixes, because they are sorted.
                         //so break early and return false
                         done = true;
                         break;
                     }
 
-                    //look for mismatched characters
+                    //If first character is below or matches first character,
+                    //look for mismatched characters in the rest of the hash.
                     for(int i=0;i<len;i++){
 
-                        //break if we find a mismatch
+                        //move on to next potential suffix if we find a mismatch.
                         if (cur_hash.charAt(i) != hash_suffix.charAt(i)){
                             cursor++;
                             break;
 
-                        //if we get to the end of the string without a mismatch, the strings match, return true.
+                        //If we get to the end of the string without a mismatch, the strings match, return true.
                         }else if(i == len - 1){
                             System.out.println("found match");
                             System.out.println(cur_hash + " " + hash_suffix);
@@ -240,9 +248,13 @@ public class Password_Validator{
                         }
                     }
                 }
+            }else{
+                //if api responded with any code besides 200.
+                System.out.println("Request to havebeenpwned did not complete successfully. Do you have a network connection?");
             }
         }catch(Exception ex){
-            System.out.println(ex);
+            // ex.printStackTrace(new PrintStream(System.out));
+            ex.printStackTrace();
             System.out.println("malformed url");
             is_match = null;
         }
@@ -251,11 +263,11 @@ public class Password_Validator{
     }
 
     public static void write_to_disk(String password) {
+        //If the password passes all tests, append it to passwords.txt. If the file doesn't exist. Create it.
         try{
             //if password is validated append it to passwords.txt
             String      output_fn = "passwords.txt";
             BufferedWriter writer = new BufferedWriter(new FileWriter(output_fn, true));
-            System.out.println(password);
             writer.write(password + "\n");
             writer.close();
         }catch(Exception ex){
@@ -265,23 +277,27 @@ public class Password_Validator{
     }
 
     public static void main(String[] args){
+        //Get input from user.
+        //Check that the input passes all tests.
+        //If it does, write it to disk.
+        //Prompt user for another password.
         while (true){
             //reset state
             Boolean     success = false;
             Boolean compromised = null;
 
-            //first get the raw password from the user. Reject it only if the input string is empty.
+            //First get the raw password from the user. Reject it only if the input string is empty.
             String   raw_passwd = get_input();
 
-            //allow for quitting gracefully.
-            //don't allow users to enter "q" as a password since it would be invalid anyways.
+            //Allow for quitting gracefully.
+            //Don't allow users to enter "q" as a password since it would be invalid anyway.
             if (raw_passwd.equals("q")){
                 System.out.println("\n\n\nQuitting now...");
                 reader.close();
                 System.exit(0);
             }
 
-            //then check if it passes the simple requirements
+            //Check if it passes the simple requirements
             success             = check_simple_reqs(raw_passwd);
 
             if(success){
@@ -291,7 +307,7 @@ public class Password_Validator{
                 //check if password exists in haveibeenpwned
                 compromised     = check_for_breach(hash);
             }else{
-                System.out.println("Password fails to meet criteria");
+                System.out.println("Password fails to meet criteria.");
             }
             if(compromised != null && !compromised){
                 System.out.println("\n\n\nPassword accepted as valid!");
