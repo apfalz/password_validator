@@ -6,8 +6,8 @@ To build project from project root directory run:
 
 To execute built package from `target/classes/` run:
 
-`java password_validator.Password_Validator`
+`java -jar Password_Validator-1.0.jar`
 
 
 Or more conveniently run:
-`mvn package && cd target/classes && java password_validator.Password_Validator`
+`mvn package && cd target && java -jar Password_Validator-1.0.jar`

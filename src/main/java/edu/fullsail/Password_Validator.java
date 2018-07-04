@@ -92,9 +92,10 @@ public class Password_Validator{
             has_min_len = true;
         }
 
+        char cur_letter;
         //Check other requirements.
         for (int i=0; i<candidate.length(); i++){
-            char cur_letter = candidate.charAt(i);
+            cur_letter = candidate.charAt(i);
             //Check for upper case letters.
             if (Character.isUpperCase(cur_letter)){
                 has_upper = true;
