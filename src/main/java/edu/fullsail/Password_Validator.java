@@ -26,11 +26,10 @@ import java.io.IOException;
 
 public class Password_Validator{
 
-    //make an instance of Scanner to handle user input.
-    //it will get closed inside of main() when program exits.
+    //Make an instance of Scanner to handle user input. It will get closed inside of main() when program exits.
     public static Scanner reader = new Scanner(System.in);
 
-    //method for checking if string is ascii printable
+    //Method for checking if string is ascii printable.
     public static boolean isAsciiPrintable(String str) {
         if (str == null) {
             return false;
@@ -44,14 +43,14 @@ public class Password_Validator{
         return true;
     }
 
-    //helper function that checks if char is asciiprintable
+    //Checks if char is asciiprintable
     public static boolean isAsciiPrintable(char ch) {
-        //allow only space through tilde to get through.;
+        //Allow only space through tilde to get through.
         return ch >= 32 && ch < 127;
     }
 
     public static String  get_input(){
-        //get input from user, reject non-printing ascii characters and empty strings.
+        //Get input from user, reject non-printing ascii characters and empty strings.
         String raw_passwd = "";
         String    message = "\n\n\n\n\n\n" + "Please enter a password. \nor enter \"q\" to quit.\n>> ";
 
@@ -59,13 +58,13 @@ public class Password_Validator{
         while(true){
             System.out.print(message);
 
-            //update message after printing to make it more responsive.
+            //Update message after printing to make it more responsive.
             message    = "\n\nPrevious entry was invalid. Please enter another password >> ";
 
-            //get raw password
+            //Get raw password.
             raw_passwd = reader.nextLine();
 
-            //reject if anything outside of printable ascii is found.
+            //Reject if anything outside of printable ascii is found.
             if (!isAsciiPrintable(raw_passwd)){
                 System.out.println("Encountered invalid non-printable ascii character. Rejecting password.");
             }
@@ -74,7 +73,7 @@ public class Password_Validator{
             else if (raw_passwd.isEmpty()){
                 System.out.print("Password cannot be blank.");
             }else{
-                //if entered passwords passed both tests, return it to main() to be further tested.
+                //If entered passwords passed both tests, return it to main() to be further tested.
                 break;
             }
         }
@@ -82,29 +81,29 @@ public class Password_Validator{
     }
 
     public static Boolean check_simple_reqs(String candidate){
-        //check for length, letters, uppercase, and digits.
+        //Check for length, letters, uppercase, and digits.
         Boolean has_min_len = false;
         Boolean   has_upper = false;
         Boolean  has_number = false;
         int     num_letters = 0;
 
-        //check for minimum length
+        //Check for minimum length.
         if (candidate.length() >= 12){
             has_min_len = true;
         }
 
-        //check other requirements
+        //Check other requirements.
         for (int i=0; i<candidate.length(); i++){
             char cur_letter = candidate.charAt(i);
-            //check for upper case letters
+            //Check for upper case letters.
             if (Character.isUpperCase(cur_letter)){
                 has_upper = true;
             }
-            // check for numbers
+            // Check for numbers.
             if (Character.isDigit(cur_letter)){
                 has_number = true;
             }
-            //check for minimum number of letters
+            //Check for minimum number of letters.
             if (Character.isLetter(cur_letter)){
                 num_letters++;
             }
@@ -129,17 +128,17 @@ public class Password_Validator{
             return false;
         }
 
-        //if all tests passed
+        //If all tests passed.
         return true;
 
     }
 
     public static String string_to_hex(String candidate){
-        //convert hash of password to hex string so it can be compared to response from api.
+        //Convert hash of password to hex string so it can be compared to response from api.
         try{
             MessageDigest digest    = MessageDigest.getInstance("SHA-1");
 
-            //hash the candidate password, convert it to hex.
+            //Hash the candidate password, convert it to hex.
             byte[]        hash      = digest.digest(candidate.getBytes(StandardCharsets.UTF_8));
 
             StringBuffer hex_string = new StringBuffer();
@@ -158,8 +157,8 @@ public class Password_Validator{
         }
     }
 
-    public static Boolean check_for_breach(String full_hash) {
-        //check haveibeenpwned.com to see if entered password appears in list of leaked password.
+    public static Boolean check_for_pwnage(String full_hash) {
+        //Check haveibeenpwned.com to see if entered password appears in list of leaked password.
 
         String   hash_prefix = "";
         String   hash_suffix = "";
@@ -167,7 +166,7 @@ public class Password_Validator{
         Boolean  is_match    = false;
 
 
-        //split full_hash into first five characters and rest of hash
+        //Split full_hash into first five characters and rest of hash.
         for (int i=0; i<full_hash.length(); i++){
             if (i < 5){
                 hash_prefix += full_hash.charAt(i);
@@ -177,32 +176,32 @@ public class Password_Validator{
         }
 
         try{
-            //make a request to the api
+            //Make a request to the api.
             URL               url = new URL("https://api.pwnedpasswords.com/range/" + hash_prefix);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("GET");
 
-            //check response code
+            //Check response code.
             int status = con.getResponseCode();
 
             if (status == 200){
-                //read the response
+                //Read the response.
                 BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
                 String         input_line;
                 String         full_response = "";
 
-                //matches come back as hex suffix followed by a colon and the number of times the suffix appears in the db.
-                //split each result and keep only the hash, append it to full_response.
+                //Matches come back as hex suffix followed by a colon and the number of times the suffix appears in the db.
+                //Split each result and keep only the hash, append it to full_response.
                 while ((input_line = in.readLine()) != null) {
                     String temp   = input_line.split(":")[0];
                     full_response = full_response + temp.toLowerCase() + "\n";
                 }
 
-                //close http connection and InputStreamReader
+                //Close http connection and InputStreamReader.
                 in.close();
                 con.disconnect();
 
-                //fill suffixes with hash suffixes
+                //Fill suffixes with hash suffixes.
                 suffixes = full_response.split("\n");
 
                 //I observed that the hashes come back sorted.
@@ -212,20 +211,20 @@ public class Password_Validator{
                 int      num_suf = suffixes.length;
                 String  cur_hash;
 
-                //git the int value of the first character in hash_suffix.
+                //Get the int value of the first character in hash_suffix.
                 int suffix_first = Integer.decode("0x" + hash_suffix.substring(0,1));
 
-                //search for matches in http response
+                //Search for matches in suffixes.
                 while(done == false && cursor < num_suf){
                     cur_hash = suffixes[cursor];
 
-                    //get int value of first character in each cur_hash
+                    //Get int value of first character in each cur_hash.
                     int cur_first  = Integer.decode("0x" + cur_hash.substring(0,1));
 
 
                     if (cur_first > suffix_first){
-                        //we know there are no matches in remaining suffixes, because they are sorted.
-                        //so break early and return false
+                        //We know there are no matches in remaining suffixes, because they are sorted.
+                        //So break early and return false.
                         done = true;
                         break;
                     }
@@ -234,7 +233,7 @@ public class Password_Validator{
                     //look for mismatched characters in the rest of the hash.
                     for(int i=0;i<len;i++){
 
-                        //move on to next potential suffix if we find a mismatch.
+                        //Move on to next potential suffix if we find a mismatch.
                         if (cur_hash.charAt(i) != hash_suffix.charAt(i)){
                             cursor++;
                             break;
@@ -249,11 +248,10 @@ public class Password_Validator{
                     }
                 }
             }else{
-                //if api responded with any code besides 200.
+                //If api responded with any code besides 200.
                 System.out.println("Request to havebeenpwned did not complete successfully. Do you have a network connection?");
             }
         }catch(Exception ex){
-            // ex.printStackTrace(new PrintStream(System.out));
             ex.printStackTrace();
             System.out.println("malformed url");
             is_match = null;
@@ -265,7 +263,6 @@ public class Password_Validator{
     public static void write_to_disk(String password) {
         //If the password passes all tests, append it to passwords.txt. If the file doesn't exist. Create it.
         try{
-            //if password is validated append it to passwords.txt
             String      output_fn = "passwords.txt";
             BufferedWriter writer = new BufferedWriter(new FileWriter(output_fn, true));
             writer.write(password + "\n");
@@ -277,12 +274,14 @@ public class Password_Validator{
     }
 
     public static void main(String[] args){
-        //Get input from user.
-        //Check that the input passes all tests.
-        //If it does, write it to disk.
-        //Prompt user for another password.
+        /* Algorithm overview:
+         *      Get input from user.
+         *      Check that the input passes all tests.
+         *      If it does, write it to disk.
+         *      Prompt user for another password.
+         */
         while (true){
-            //reset state
+            //Reset state.
             Boolean     success = false;
             Boolean compromised = null;
 
@@ -297,15 +296,15 @@ public class Password_Validator{
                 System.exit(0);
             }
 
-            //Check if it passes the simple requirements
+            //Check if it passes the simple requirements.
             success             = check_simple_reqs(raw_passwd);
 
             if(success){
-                //get hex string of sha-1 hash of raw password.
+                //Get hex string of sha-1 hash of raw password.
                 String     hash = string_to_hex(raw_passwd);
 
-                //check if password exists in haveibeenpwned
-                compromised     = check_for_breach(hash);
+                //Check if password exists in haveibeenpwned.
+                compromised     = check_for_pwnage(hash);
             }else{
                 System.out.println("Password fails to meet criteria.");
             }
